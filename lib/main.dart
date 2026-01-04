@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:job_application_manager/form.dart';
+import 'package:job_application_manager/job_detail_dialog.dart';
+import 'package:job_application_manager/jobtile.dart';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -68,27 +70,37 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  void _showJobDetail(Job job) {
+    showDialog(
+      context: context,
+      builder: (_) => JobDetailDialog(
+        job: job,
+        onDeleted: _fetchJobs, // refresh after delete
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: Text(widget.title),
       ),
-      body: ListView.builder(
-          itemCount: _jobs.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(_jobs[index].companyName),
-              subtitle: Text(_jobs[index].jobTitle),
-            );
-          }),
+      body: GridView.builder(
+        padding: const EdgeInsets.all(8),
+        itemCount: _jobs.length,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2, // 2 columns – tweak as you like
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: 3 / 2, // ~height of a tile
+        ),
+        itemBuilder: (_, idx) {
+          final job = _jobs[idx];
+          return JobTile(job: job, onTap: () => _showJobDetail(job));
+        },
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddJobDialog(context),
         tooltip: 'Add Job',
