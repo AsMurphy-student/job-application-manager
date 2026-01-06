@@ -59,17 +59,4 @@ class DatabaseHelper {
     Database db = await instance.db;
     return await db.delete('jobs', where: 'id = ?', whereArgs: [id]);
   }
-
-  // Future<void> initializeUsers() async {
-  //   List<Job> usersToAdd = [
-  //     Job(username: 'John', email: 'john@example.com'),
-  //     Job(username: 'Jane', email: 'jane@example.com'),
-  //     Job(username: 'Alice', email: 'alice@example.com'),
-  //     Job(username: 'Bob', email: 'bob@example.com'),
-  //   ];
-
-  //   for (Job user in usersToAdd) {
-  //     await insertUser(user);
-  //   }
-  // }
 }
