@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:job_application_manager/form.dart';
 import 'package:job_application_manager/job_detail_dialog.dart';
 import 'package:job_application_manager/jobtile.dart';
+import 'package:job_application_manager/theme.dart';
 
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
@@ -28,10 +29,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
+      theme: deepBurgundyTheme,
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -84,7 +82,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        backgroundColor: Theme.of(context).colorScheme.secondary,
         title: Text(widget.title),
       ),
       body: GridView.builder(

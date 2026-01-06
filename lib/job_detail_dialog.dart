@@ -52,8 +52,7 @@ class JobDetailDialog extends StatelessWidget {
                   onPressed: () => Navigator.of(context).pop(),
                 ),
               ],
-              backgroundColor: Theme.of(context).colorScheme.primary,
-              surfaceTintColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: Theme.of(context).colorScheme.secondary,
             ),
             /* ---- 2. Body (description) ---- */
             Expanded(
