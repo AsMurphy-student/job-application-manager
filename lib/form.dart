@@ -124,11 +124,17 @@ class _AddJobDialogState extends State<AddJobDialog> {
               decoration: const InputDecoration(labelText: 'Job Title'),
             ),
             // Job Description
-            TextField(
-              controller: _jobDescriptionController,
-              decoration: const InputDecoration(labelText: 'Job Description'),
-              minLines: 4,
-              maxLines: 10,
+            ConstrainedBox(
+              constraints:
+                  const BoxConstraints(maxWidth: 400), // <-- max width you like
+              child: TextField(
+                controller: _jobDescriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Job Description',
+                ),
+                minLines: 4,
+                maxLines: 10,
+              ),
             ),
             // Min Annual Wage
             TextField(

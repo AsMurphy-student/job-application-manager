@@ -25,11 +25,11 @@ class JobDetailDialog extends StatelessWidget {
   Future<void> _delete(BuildContext context) async {
     if (job.id == null) return;
     await DatabaseHelper.instance.deleteJob(job.id!);
-    Navigator.of(context).pop();            // close dialog
+    Navigator.of(context).pop(); // close dialog
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Job deleted')),
     );
-    onDeleted();                            // refresh the list
+    onDeleted(); // refresh the list
   }
 
   /* ---------- UI ---------- */
@@ -59,9 +59,13 @@ class JobDetailDialog extends StatelessWidget {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(12),
-                child: Text(
-                  job.jobDescription ?? '',
-                  style: const TextStyle(fontSize: 16),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(
+                      maxWidth: 400), // match form or use MediaQuery
+                  child: Text(
+                    job.jobDescription,
+                    style: const TextStyle(fontSize: 14),
+                  ),
                 ),
               ),
             ),
