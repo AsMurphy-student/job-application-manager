@@ -48,6 +48,34 @@ class DatabaseHelper {
     return await db.query('jobs');
   }
 
+  /// Returns all jobs sorted by the given column and direction.
+  /// `orderBy` may be: 'id' (default), 'companyName', or 'dateApplied'.
+  /// `descending` flips the sort order.
+  Future<List<Job>> queryAllJobsSorted({
+    String orderBy = 'id',
+    bool descending = false,
+  }) async {
+    final db = await instance.db;
+    final column = _mapOrderBy(orderBy);          // map UI name → SQL column
+    final order  = descending ? 'DESC' : 'ASC';
+
+    final rows = await db.query(
+      'jobs',
+      orderBy: '$column $order',
+    );
+
+    return rows.map((m) => Job.fromMap(m)).toList();
+  }
+
+  // Private helper: translate UI selector → real column name
+  String _mapOrderBy(String uiName) {
+    switch (uiName) {
+      case 'companyName': return 'companyName';
+      case 'dateApplied': return 'dateSinceEpoch';
+      default:            return 'id';
+    }
+  }
+
   Future<int> updateJob(Job job) async {
     Database db = await instance.db;
     return await db
