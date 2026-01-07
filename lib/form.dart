@@ -124,12 +124,12 @@ class _AddJobDialogState extends State<AddJobDialog> {
     if (_locationController.text != (_originalJob.location ?? '')) return true;
 
     // 4. Dropdowns
-    if (_jobType != (_originalJob.jobType ?? 'Remote')) return true;
-    if (_status != (_originalJob.status ?? 'InProgress')) return true;
+    if (_jobType != (_originalJob.jobType)) return true;
+    if (_status != (_originalJob.status)) return true;
 
     // 5. Date – compare epoch milliseconds
     final epochFromField = _selectedDate?.millisecondsSinceEpoch ?? 0;
-    if (epochFromField != (_originalJob.dateSinceEpoch ?? 0)) return true;
+    if (epochFromField != (_originalJob.dateSinceEpoch)) return true;
 
     // If none of the above returned true, nothing changed
     return false;
@@ -156,6 +156,7 @@ class _AddJobDialogState extends State<AddJobDialog> {
     try {
       // ② Build a Job instance *only* to pass to the DB helper
       final newJob = Job(
+        id: widget.existingJob?.id,
         companyName: _companyNameController.text,
         jobTitle: _jobTitleController.text,
         jobDescription: _jobDescriptionController.text,
