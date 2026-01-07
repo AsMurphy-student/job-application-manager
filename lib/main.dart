@@ -64,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void _showAddJobDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (_) => AddJobDialog(onJobAdded: _fetchJobs),
+      builder: (_) => AddJobDialog(onFinished: _fetchJobs),
     );
   }
 

@@ -7,9 +7,11 @@ import 'package:job_application_manager/job.dart';
 
 /// A dialog that contains a form for adding a new job.
 class AddJobDialog extends StatefulWidget {
-  final VoidCallback onJobAdded;
+  final Job? existingJob;
+  final VoidCallback onFinished;
 
-  const AddJobDialog({Key? key, required this.onJobAdded}) : super(key: key);
+  const AddJobDialog({Key? key, this.existingJob, required this.onFinished})
+      : super(key: key);
 
   @override
   State<AddJobDialog> createState() => _AddJobDialogState();
@@ -32,6 +34,9 @@ class _AddJobDialogState extends State<AddJobDialog> {
   // Date selection
   DateTime? _selectedDate;
 
+  // Orignal Job if editing
+  late Job _originalJob;
+
   @override
   void dispose() {
     _companyNameController.dispose();
@@ -42,6 +47,40 @@ class _AddJobDialogState extends State<AddJobDialog> {
     _locationController.dispose();
     _interviewsCompletedController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    // If the dialog is opened for editing, load the original job.
+    if (widget.existingJob != null) {
+      _originalJob = widget.existingJob!;
+
+      // Text fields
+      _companyNameController.text = _originalJob.companyName ?? '';
+      _jobTitleController.text = _originalJob.jobTitle ?? '';
+      _jobDescriptionController.text = _originalJob.jobDescription ?? '';
+      _minAnnualWageController.text =
+          _originalJob.minAnnualWage?.toString() ?? '';
+      _maxAnnualWageController.text =
+          _originalJob.maxAnnualWage?.toString() ?? '';
+      _locationController.text = _originalJob.location ?? '';
+      _interviewsCompletedController.text =
+          _originalJob.interviewsCompleted?.toString() ?? '';
+
+      // Dropdowns
+      _jobType = _originalJob.jobType;
+      _status = _originalJob.status;
+
+      // Date picker (if a date is stored)
+      if (_originalJob.dateSinceEpoch > 0) {
+        _selectedDate =
+            DateTime.fromMillisecondsSinceEpoch(_originalJob.dateSinceEpoch!);
+      } else {
+        _selectedDate = null;
+      }
+    }
   }
 
   // Helper to reset all fields
@@ -60,6 +99,42 @@ class _AddJobDialogState extends State<AddJobDialog> {
     });
   }
 
+  /// Returns true if at least one editable field differs from the original Job.
+  bool _hasChanged() {
+    // 1. Text fields – compare the plain string
+    if (_companyNameController.text != (_originalJob.companyName ?? '')) {
+      return true;
+    }
+    if (_jobTitleController.text != (_originalJob.jobTitle ?? '')) return true;
+    if (_jobDescriptionController.text != (_originalJob.jobDescription ?? '')) {
+      return true;
+    }
+
+    // 2. Numeric fields – parse and compare
+    final minWage = int.tryParse(_minAnnualWageController.text) ?? 0;
+    if (minWage != (_originalJob.minAnnualWage ?? 0)) return true;
+
+    final maxWage = int.tryParse(_maxAnnualWageController.text) ?? 0;
+    if (maxWage != (_originalJob.maxAnnualWage ?? 0)) return true;
+
+    final interviews = int.tryParse(_interviewsCompletedController.text) ?? 0;
+    if (interviews != (_originalJob.interviewsCompleted ?? 0)) return true;
+
+    // 3. String fields
+    if (_locationController.text != (_originalJob.location ?? '')) return true;
+
+    // 4. Dropdowns
+    if (_jobType != (_originalJob.jobType ?? 'Remote')) return true;
+    if (_status != (_originalJob.status ?? 'InProgress')) return true;
+
+    // 5. Date – compare epoch milliseconds
+    final epochFromField = _selectedDate?.millisecondsSinceEpoch ?? 0;
+    if (epochFromField != (_originalJob.dateSinceEpoch ?? 0)) return true;
+
+    // If none of the above returned true, nothing changed
+    return false;
+  }
+
   // Show a date picker and store the selected date
   Future<void> _pickDate(BuildContext context) async {
     final now = DateTime.now();
@@ -76,10 +151,11 @@ class _AddJobDialogState extends State<AddJobDialog> {
     }
   }
 
-  // Handle upload button press
   Future<void> _handleUpload() async {
+    // ① Quick validation (required fields, numeric parsing, etc.)
     try {
-      final job = Job(
+      // ② Build a Job instance *only* to pass to the DB helper
+      final newJob = Job(
         companyName: _companyNameController.text,
         jobTitle: _jobTitleController.text,
         jobDescription: _jobDescriptionController.text,
@@ -92,13 +168,27 @@ class _AddJobDialogState extends State<AddJobDialog> {
         interviewsCompleted: int.parse(_interviewsCompletedController.text),
       );
 
-      print(job);
+      // ③ If we’re editing, guard against a no‑op update
+      if (widget.existingJob != null) {
+        if (!_hasChanged()) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('No changes detected')),
+          );
+          return; // Abort the database call
+        }
 
-      await DatabaseHelper.instance.insertJob(job);
-      widget.onJobAdded(); // refresh the list
-      Navigator.of(context).pop();
+        // ④ Perform the UPDATE
+        // newJob.id = widget.existingJob!.id; // keep the original PK
+        await DatabaseHelper.instance.updateJob(newJob);
+      } else {
+        // ⑤ Otherwise, perform an INSERT
+        await DatabaseHelper.instance.insertJob(newJob);
+      }
+
+      widget.onFinished(); // refresh list in parent
+      Navigator.of(context).pop(); // close the dialog
     } catch (e) {
-      // Simple error handling: show a snackbar
+      // ⑥ Handle parsing or other errors
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all fields correctly')),
       );
