@@ -51,16 +51,22 @@ class DatabaseHelper {
   /// Returns all jobs sorted by the given column and direction.
   /// `orderBy` may be: 'id' (default), 'companyName', or 'dateApplied'.
   /// `descending` flips the sort order.
-  Future<List<Job>> queryAllJobsSorted({
+  Future<List<Job>> queryJobsByFilter({
     String orderBy = 'id',
     bool descending = false,
+    List<String> statuses = const ['InProgress', 'Completed'],
   }) async {
     final db = await instance.db;
-    final column = _mapOrderBy(orderBy);          // map UI name → SQL column
-    final order  = descending ? 'DESC' : 'ASC';
+
+    // Convert the list of statuses into the right number of "?" placeholders
+    final placeholders = statuses.map((_) => '?').join(', ');
+    final column = _mapOrderBy(orderBy);
+    final order = descending ? 'DESC' : 'ASC';
 
     final rows = await db.query(
       'jobs',
+      where: 'status IN ($placeholders)',
+      whereArgs: statuses,
       orderBy: '$column $order',
     );
 
@@ -70,9 +76,12 @@ class DatabaseHelper {
   // Private helper: translate UI selector → real column name
   String _mapOrderBy(String uiName) {
     switch (uiName) {
-      case 'companyName': return 'companyName';
-      case 'dateApplied': return 'dateSinceEpoch';
-      default:            return 'id';
+      case 'companyName':
+        return 'companyName';
+      case 'dateApplied':
+        return 'dateSinceEpoch';
+      default:
+        return 'id';
     }
   }
 

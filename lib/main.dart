@@ -51,6 +51,14 @@ class _MyHomePageState extends State<MyHomePage> {
   String _filterBy = 'id'; // id | companyName | dateApplied
   bool _descending = false; // false → ascending, true → descending
 
+  List<String> _selectedStatuses = ['InProgress', 'Completed']; // default
+  final List<String> _allStatuses = [
+    'InProgress',
+    'Completed',
+    'Rejected',
+    'Ghosted',
+  ];
+
   @override
   initState() {
     super.initState();
@@ -58,9 +66,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _loadJobs() async {
-    final jobs = await DatabaseHelper.instance.queryAllJobsSorted(
+    final jobs = await DatabaseHelper.instance.queryJobsByFilter(
       orderBy: _filterBy,
       descending: _descending,
+      statuses: _selectedStatuses,
     );
     setState(() => _jobs = jobs);
   }
@@ -81,6 +90,17 @@ class _MyHomePageState extends State<MyHomePage> {
         onDeleted: _loadJobs, // refresh after delete
       ),
     );
+  }
+
+  void _toggleStatus(String status) {
+    setState(() {
+      if (_selectedStatuses.contains(status)) {
+        _selectedStatuses.remove(status);
+      } else {
+        _selectedStatuses.add(status);
+      }
+    });
+    _loadJobs(); // re‑query with the new status list
   }
 
   @override
@@ -131,7 +151,33 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ],
             ),
-          )
+          ),
+          PopupMenuButton<int>(
+            icon: const Icon(Icons.event_note,
+                color: Colors.white), // looks like a “status” icon
+            itemBuilder: (context) {
+              return _allStatuses.asMap().entries.map((entry) {
+                final int idx = entry.key;
+                final String status = entry.value;
+                final bool isSelected = _selectedStatuses.contains(status);
+
+                return PopupMenuItem<int>(
+                  value: idx,
+                  child: Row(
+                    children: [
+                      Checkbox(
+                        value: isSelected,
+                        onChanged: (_) =>
+                            _toggleStatus(status), // defined below
+                      ),
+                      Text(status),
+                    ],
+                  ),
+                );
+              }).toList();
+            },
+            onSelected: (_) {}, // actual work is done in _toggleStatus
+          ),
         ],
       ),
       body: GridView.builder(
