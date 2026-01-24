@@ -11,10 +11,10 @@ class JobDetailDialog extends StatelessWidget {
   final VoidCallback onDeleted; // called after a successful delete
 
   const JobDetailDialog({
-    Key? key,
+    super.key,
     required this.job,
     required this.onDeleted,
-  }) : super(key: key);
+  });
 
   /* ---------- DATE HELPERS ---------- */
   String get formattedDate {
@@ -26,6 +26,7 @@ class JobDetailDialog extends StatelessWidget {
   Future<void> _delete(BuildContext context) async {
     if (job.id == null) return;
     await DatabaseHelper.instance.deleteJob(job.id!);
+    if (!context.mounted) return;
     Navigator.of(context).pop(); // close dialog
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Job deleted')),

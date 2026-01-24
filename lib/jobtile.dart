@@ -5,7 +5,7 @@ class JobTile extends StatelessWidget {
   final Job job;
   final VoidCallback onTap;
 
-  const JobTile({required this.job, required this.onTap});
+  const JobTile({super.key, required this.job, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

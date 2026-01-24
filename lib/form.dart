@@ -10,8 +10,7 @@ class AddJobDialog extends StatefulWidget {
   final Job? existingJob;
   final VoidCallback onFinished;
 
-  const AddJobDialog({Key? key, this.existingJob, required this.onFinished})
-      : super(key: key);
+  const AddJobDialog({super.key, this.existingJob, required this.onFinished});
 
   @override
   State<AddJobDialog> createState() => _AddJobDialogState();
@@ -58,16 +57,14 @@ class _AddJobDialogState extends State<AddJobDialog> {
       _originalJob = widget.existingJob!;
 
       // Text fields
-      _companyNameController.text = _originalJob.companyName ?? '';
-      _jobTitleController.text = _originalJob.jobTitle ?? '';
-      _jobDescriptionController.text = _originalJob.jobDescription ?? '';
-      _minAnnualWageController.text =
-          _originalJob.minAnnualWage?.toString() ?? '';
-      _maxAnnualWageController.text =
-          _originalJob.maxAnnualWage?.toString() ?? '';
-      _locationController.text = _originalJob.location ?? '';
+      _companyNameController.text = _originalJob.companyName;
+      _jobTitleController.text = _originalJob.jobTitle;
+      _jobDescriptionController.text = _originalJob.jobDescription;
+      _minAnnualWageController.text = _originalJob.minAnnualWage.toString();
+      _maxAnnualWageController.text = _originalJob.maxAnnualWage.toString();
+      _locationController.text = _originalJob.location;
       _interviewsCompletedController.text =
-          _originalJob.interviewsCompleted?.toString() ?? '';
+          _originalJob.interviewsCompleted.toString();
 
       // Dropdowns
       _jobType = _originalJob.jobType;
@@ -76,7 +73,7 @@ class _AddJobDialogState extends State<AddJobDialog> {
       // Date picker (if a date is stored)
       if (_originalJob.dateSinceEpoch > 0) {
         _selectedDate =
-            DateTime.fromMillisecondsSinceEpoch(_originalJob.dateSinceEpoch!);
+            DateTime.fromMillisecondsSinceEpoch(_originalJob.dateSinceEpoch);
       } else {
         _selectedDate = null;
       }
@@ -102,26 +99,26 @@ class _AddJobDialogState extends State<AddJobDialog> {
   /// Returns true if at least one editable field differs from the original Job.
   bool _hasChanged() {
     // 1. Text fields – compare the plain string
-    if (_companyNameController.text != (_originalJob.companyName ?? '')) {
+    if (_companyNameController.text != (_originalJob.companyName)) {
       return true;
     }
-    if (_jobTitleController.text != (_originalJob.jobTitle ?? '')) return true;
-    if (_jobDescriptionController.text != (_originalJob.jobDescription ?? '')) {
+    if (_jobTitleController.text != (_originalJob.jobTitle)) return true;
+    if (_jobDescriptionController.text != (_originalJob.jobDescription)) {
       return true;
     }
 
     // 2. Numeric fields – parse and compare
     final minWage = int.tryParse(_minAnnualWageController.text) ?? 0;
-    if (minWage != (_originalJob.minAnnualWage ?? 0)) return true;
+    if (minWage != (_originalJob.minAnnualWage)) return true;
 
     final maxWage = int.tryParse(_maxAnnualWageController.text) ?? 0;
-    if (maxWage != (_originalJob.maxAnnualWage ?? 0)) return true;
+    if (maxWage != (_originalJob.maxAnnualWage)) return true;
 
     final interviews = int.tryParse(_interviewsCompletedController.text) ?? 0;
-    if (interviews != (_originalJob.interviewsCompleted ?? 0)) return true;
+    if (interviews != (_originalJob.interviewsCompleted)) return true;
 
     // 3. String fields
-    if (_locationController.text != (_originalJob.location ?? '')) return true;
+    if (_locationController.text != (_originalJob.location)) return true;
 
     // 4. Dropdowns
     if (_jobType != (_originalJob.jobType)) return true;
@@ -187,6 +184,7 @@ class _AddJobDialogState extends State<AddJobDialog> {
       }
 
       widget.onFinished(); // refresh list in parent
+      if (!mounted) return;
       Navigator.of(context).pop(); // close the dialog
     } catch (e) {
       // ⑥ Handle parsing or other errors

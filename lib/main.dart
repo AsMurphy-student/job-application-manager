@@ -51,7 +51,7 @@ class _MyHomePageState extends State<MyHomePage> {
   String _filterBy = 'id'; // id | companyName | dateApplied
   bool _descending = true; // false → ascending, true → descending
 
-  List<String> _selectedStatuses = ['InProgress', 'Completed']; // default
+  final List<String> _selectedStatuses = ['InProgress', 'Completed'];
   final List<String> _allStatuses = [
     'InProgress',
     'Completed',
