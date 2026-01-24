@@ -13,7 +13,9 @@ class JobTile extends StatelessWidget {
     Widget topRow = Row(
       children: [
         Expanded(
-            child: Text(job.companyName, style: const TextStyle(fontSize: 16))),
+            child: Text(job.companyName,
+                style: const TextStyle(
+                    fontSize: 16, decoration: TextDecoration.underline))),
         Text(job.jobTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
       ],
     );
@@ -50,7 +52,7 @@ class JobTile extends StatelessWidget {
         elevation: 1, // a lighter shadow fits smaller cards
         child: Padding(
           padding: const EdgeInsets.symmetric(
-              vertical: 8, horizontal: 4), // smaller padding
+              vertical: 12, horizontal: 8), // smaller padding
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,

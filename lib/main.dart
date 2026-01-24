@@ -184,10 +184,10 @@ class _MyHomePageState extends State<MyHomePage> {
         padding: const EdgeInsets.all(4),
         itemCount: _jobs.length,
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: 300, // <-- maximum tile width
+          maxCrossAxisExtent: 350,
           mainAxisSpacing: 4,
           crossAxisSpacing: 4,
-          childAspectRatio: 1.5, // keep tiles roughly square
+          childAspectRatio: 1.5,
         ),
         itemBuilder: (_, idx) {
           final job = _jobs[idx];
