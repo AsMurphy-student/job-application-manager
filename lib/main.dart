@@ -49,7 +49,7 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Job> _jobs = [];
   // NEW: current filter & sort settings
   String _filterBy = 'id'; // id | companyName | dateApplied
-  bool _descending = false; // false → ascending, true → descending
+  bool _descending = true; // false → ascending, true → descending
 
   List<String> _selectedStatuses = ['InProgress', 'Completed']; // default
   final List<String> _allStatuses = [
