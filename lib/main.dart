@@ -28,18 +28,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Job Application Manager',
       theme: deepBurgundyTheme,
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      home: const MyHomePage(),
       debugShowCheckedModeBanner: false,
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
+  const MyHomePage({super.key});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -47,6 +45,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Job> _jobs = [];
+  List<Job> _allJobs = [];
   // NEW: current filter & sort settings
   String _filterBy = 'id'; // id | companyName | dateApplied
   bool _descending = true; // false → ascending, true → descending
@@ -72,6 +71,12 @@ class _MyHomePageState extends State<MyHomePage> {
       statuses: _selectedStatuses,
     );
     setState(() => _jobs = jobs);
+    final allJobs = await DatabaseHelper.instance.queryJobsByFilter(
+      orderBy: _filterBy,
+      descending: _descending,
+      statuses: ['InProgress', 'Completed', 'Rejected', 'Ghosted'],
+    );
+    setState(() => _allJobs = allJobs);
   }
 
   // Show the dialog that contains the add‑job form
@@ -108,7 +113,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
-        title: Text(widget.title),
+        title: Text('Job Application Manager | ${_allJobs.length} Jobs Added'),
         actions: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
