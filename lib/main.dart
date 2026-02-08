@@ -46,6 +46,8 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<Job> _jobs = [];
   List<Job> _allJobs = [];
+
+  String _searchQuery = '';
   // NEW: current filter & sort settings
   String _filterBy = 'id'; // id | companyName | dateApplied
   bool _descending = true; // false → ascending, true → descending
@@ -110,6 +112,28 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final double screenW = MediaQuery.of(context).size.width;
+
+    final double searchBarW = (screenW * 0.35).clamp(120.0, 250.0);
+
+    List<Job> displayedJobs;
+    if (_searchQuery.isEmpty) {
+      // No search – show the full list (already sorted by _filterBy)
+      displayedJobs = List.from(_jobs);
+    } else {
+      final query = _searchQuery.toLowerCase();
+      displayedJobs = _jobs
+          .where((job) => job.companyName.toLowerCase().contains(query))
+          .toList();
+
+      // Sort by companyName (case‑insensitive)
+      displayedJobs.sort((a, b) {
+        final cmp =
+            a.companyName.toLowerCase().compareTo(b.companyName.toLowerCase());
+        return _descending ? -cmp : cmp;
+      });
+    }
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.secondary,
@@ -119,6 +143,41 @@ class _MyHomePageState extends State<MyHomePage> {
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             child: Row(
               children: [
+                Container(
+                  width: searchBarW,
+                  height: 36,
+                  margin: const EdgeInsets.only(right: 12),
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Search company',
+                      hintStyle: const TextStyle(color: Colors.white70),
+                      border: OutlineInputBorder(
+                        borderSide: const BorderSide(color: Colors.white54),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white12,
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear,
+                                  color: Colors.white70),
+                              onPressed: () {
+                                setState(() {
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
+                    ),
+                    onChanged: (value) {
+                      setState(() {
+                        _searchQuery = value.trim();
+                      });
+                    },
+                  ),
+                ),
                 // ① Sort‑by column selector
                 DropdownButton<String>(
                   value: _filterBy,
@@ -187,7 +246,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: GridView.builder(
         padding: const EdgeInsets.all(4),
-        itemCount: _jobs.length,
+        itemCount: displayedJobs.length,
         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
           maxCrossAxisExtent: 350,
           mainAxisSpacing: 4,
@@ -195,7 +254,7 @@ class _MyHomePageState extends State<MyHomePage> {
           childAspectRatio: 1.5,
         ),
         itemBuilder: (_, idx) {
-          final job = _jobs[idx];
+          final job = displayedJobs[idx];
           return JobTile(job: job, onTap: () => _showJobDetail(job));
         },
       ),
